@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: maven-apps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+            namespace: dev
+            valuesFile: values.yaml
+
+  template:
+    metadata:
+      name: '{{env}}-maven-app'
+      annotations:
+        argocd-image-updater.argoproj.io/image-list: app=docker.io/sujith1913/go-cart
+        argocd-image-updater.argoproj.io/app.update-strategy: newest-build
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/github-creds
+        argocd-image-updater.argoproj.io/write-back-target: "helmvalues:{{valuesFile}}"
+        argocd-image-updater.argoproj.io/app.helm.image-name: image.repository
+        argocd-image-updater.argoproj.io/app.helm.image-tag: image.tag
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/msujith1319/go-cart-menifest-file.git
+        targetRevision: main
+        path: go-cart
+        helm:
+          releaseName: '{{env}}-maven-app'
+          valueFiles:
+            - '{{valuesFile}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
