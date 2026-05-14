@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: maven-apps
+  name: node-app
   namespace: argocd
 spec:
   generators:
@@ -13,7 +13,7 @@ spec:
 
   template:
     metadata:
-      name: '{{env}}-maven-app'
+      name: '{{env}}-node-app'
       annotations:
         argocd-image-updater.argoproj.io/image-list: app=docker.io/sujith1913/go-cart
         argocd-image-updater.argoproj.io/app.update-strategy: newest-build
@@ -28,7 +28,7 @@ spec:
         targetRevision: main
         path: go-cart
         helm:
-          releaseName: '{{env}}-maven-app'
+          releaseName: '{{env}}-node-app'
           valueFiles:
             - '{{valuesFile}}'
       destination:
